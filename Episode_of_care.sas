@@ -1,4 +1,4 @@
-%macro Episode_of_care(dsn=, EoC_tid=28800, forste_hastegrad = 1, behold_datotid=0, debug = 0, nulle_liggedogn = 0, kols = 0);
+%macro Episode_of_care(dsn=, EoC_tid=28800, forste_hastegrad = 1, behold_datotid=0, debug = 0, nulle_liggedogn = 0, kols = 0, inndeling = 0);
 /*!
 ### Beskrivelse
 
@@ -16,6 +16,11 @@ Inndatasettet må inneholde inndato utdato inntid og uttid
 4. `behold_datotid` (=0): Hvis ulik 0, så beholdes disse 
 5. `debug` (=0): Spytter ut midlertidige datasett hvis forskjellig fra null
 6. `nulle_liggedogn` (=0): Hvis forskjellig fra null, så settes antall EoC_liggedogn til null hvis opphold er <8 timer
+7. `inndeling` (= 0):
+  - 0: alle kontakter til pasient, uavhengig av behandler, teller som en episode
+  - 1: alle kontakter til pasient internt i et behandlende RHF teller som en episode
+  - 2: alle kontakter til pasient internt i et behandlende HF teller som en episode
+  - 3: alle kontakter til pasient internt i et behandlende sykehus teller som en episode
 
 Episode of care omfatter da:
 - Dersom inndatotid på nytt opphold er før utdatotid på forrige opphold
@@ -39,13 +44,23 @@ Makroen lager 12 (eventuelt 14) nye variabler:
 13. `EoC_forste_hastegrad`: Hastegrad for første avdelingsopphold. 1 for akutt, 4 for elektiv
 14. `EoC_uttilstand`: max(uttilstand) for oppholdene i en EoC ("som død" hvis ett av oppholdene er "som død")
 
-### Forfatter
+### Endringslogg
 
-Opprettet 26.10.2016 av Frank Olsen
-
-Endret 26.10.2016 av Frank Olsen
-
-Endret 29.11.2016 av Arnfinn
+- 26.10.2016 Opprettet av Frank Olsen
+- 26.10.2016 Endret av Frank Olsen
+- november 2016 Diverse endringer av Arnfinn
+- desember 2016, Arnfinn
+  - nytt argument: nulle_liggedogn
+  - diverse andre endringer
+- mai 2017, Arnfinn
+  - eoc_hastegrad defineres kun for innleggelser
+- august 2017, Arnfinn
+  - hastegrad_inn = hastegrad hvis døgn
+  - hvis kols = 0 så er EoC_hastegrad = min(hastegrad_inn)
+  - hvis kols ne 0 så er EoC_hastegrad = min(hastegrad)
+  - EoC-makroen fungerte ikke hvis man hadde med avtalespesialister
+- januar 2018, Arnfinn
+  - nytt argument: inndeling 
 
 */
 
@@ -69,6 +84,17 @@ utdatotid=dhms(utDato,0,0,utTid);
 format inndatotid utdatotid datetime18.;
 run;
 
+%if &inndeling = 1 %then %do;
+    %let beh = behrhf;
+%end;
+%else %if &inndeling = 2 %then %do;
+    %let beh = behhf;
+%end;
+%else %if &inndeling = 3 %then %do;
+    %let beh = behsh;
+%end;
+
+
 proc sort data=&dsn;
 by pid inndatotid utdatotid;
 run;
@@ -85,6 +111,11 @@ end;
 	
 lag_pid=lag(pid);
 lag_utdatotid=lag(utdatotid);
+%if &inndeling ne 0 %then %do;
+    lag_beh = lag(&beh);
+%end;
+
+/* Beregne tidsdifferansen mellom opphold */
 if lag_pid=pid then do;
 	if lag_utdatotid>inndatotid then EoC_overlapp=1;
 	EoC_diff=inndatotid-tmp_utdatotid; /*Tidsdifferanse (timer) mellom inndatotid på dette oppholdet og utdatotid på forrige opphold */
@@ -102,9 +133,15 @@ proc sort data=&dsn;
 by pid inndatotid utdatotid;
 run;
 
+/* Markere opphold som ikke skal inngå i EoC fra forrige linje som brudd i EoC */
 data &dsn;
 set &dsn;
-if (pid=lag_pid and EoC_diff>=&EoC_tid) or (Pid ne lag_pid and EoC_diff=.) then EoC_brudd=1; 
+%if &inndeling ne 0 %then %do;
+if (pid=lag_pid and (EoC_diff>=&EoC_tid or &beh ne lag_beh)) or (Pid ne lag_pid and EoC_diff=.) then EoC_brudd=1;
+%end;
+%else %do;
+if (pid=lag_pid and EoC_diff>=&EoC_tid) or (Pid ne lag_pid and EoC_diff=.) then EoC_brudd=1;
+%end;
 run;
 
 /*Nummerere EoC-oppholdene*/
