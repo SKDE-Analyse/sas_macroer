@@ -16,9 +16,17 @@ Sammenligner datasettene som spyttes ut med referanse-sett (skde_arn.ref_eoc[n])
 
 %include "\\tos-sas-skde-01\SKDE_SAS\makroer\&branch.\episode_of_care.sas";
 
+
+/*
+Hente pseudosensitivt datasett
+*/
 data startsett;
 set skde_arn.pseudosens_avd_magnus (drop = Bdiag: drg drg_type episodeFag Hdiag: ICD10Kap  InstitusjonId KoblingsID korrvekt ncmp: ncsp: ncrp: polUtforende_1);
 run;
+
+/*
+Sjekk at det er trygt å kjøre EoC makroen flere ganger etter hverandre
+*/
 
 data testset;
 set startsett;
@@ -38,6 +46,10 @@ run;
 
 proc compare base=skde_arn.ref_eoc1 compare=testset BRIEF WARNING LISTVAR;
 
+/*
+Sjekk forste_hastegrad = 0
+*/
+
 data testset;
 set startsett;
 run;
@@ -51,6 +63,10 @@ run;
 %end;
 
 proc compare base=skde_arn.ref_eoc2 compare=testset BRIEF WARNING LISTVAR;
+
+/*
+Sjekk at inntid og uttid er korrekt
+*/
 
 data testset;
 set startsett;
@@ -66,6 +82,10 @@ run;
 
 proc compare base=skde_arn.ref_eoc3 compare=testset BRIEF WARNING LISTVAR;
 
+/*
+Teste det å nulle liggedøgn for dag og poliklinikk
+*/
+
 data testset;
 set startsett;
 run;
@@ -79,6 +99,101 @@ run;
 %end;
 
 proc compare base=skde_arn.ref_eoc4 compare=testset BRIEF WARNING LISTVAR;
+
+
+/*
+Teste det å ikke aggregere poliklinikk i EoC (ekskluder_poli ne 0)
+*/
+
+data testset;
+set startsett;
+run;
+
+%episode_of_care(dsn=testset, ekskluder_poli = 1);
+
+%if &lag_referanse ne 0 %then %do;
+data skde_arn.ref_eoc5;
+set testset;
+run;
+%end;
+
+proc compare base=skde_arn.ref_eoc5 compare=testset BRIEF WARNING LISTVAR;
+
+
+/*
+Teste kols = 1
+*/
+
+data testset;
+set startsett;
+run;
+
+%episode_of_care(dsn=testset, kols = 1);
+
+%if &lag_referanse ne 0 %then %do;
+data skde_arn.ref_eoc6;
+set testset;
+run;
+%end;
+
+proc compare base=skde_arn.ref_eoc6 compare=testset BRIEF WARNING LISTVAR;
+
+
+/*
+Teste inndeling = 1 
+*/
+
+data testset;
+set startsett;
+run;
+
+%episode_of_care(dsn=testset, inndeling = 1);
+
+%if &lag_referanse ne 0 %then %do;
+data skde_arn.ref_eoc7a;
+set testset;
+run;
+%end;
+
+proc compare base=skde_arn.ref_eoc7a compare=testset BRIEF WARNING LISTVAR;
+
+
+/*
+Teste inndeling = 2
+*/
+
+data testset;
+set startsett;
+run;
+
+%episode_of_care(dsn=testset, inndeling = 2);
+
+%if &lag_referanse ne 0 %then %do;
+data skde_arn.ref_eoc7b;
+set testset;
+run;
+%end;
+
+proc compare base=skde_arn.ref_eoc7b compare=testset BRIEF WARNING LISTVAR;
+
+
+/*
+Teste inndeling = 3
+*/
+
+data testset;
+set startsett;
+run;
+
+%episode_of_care(dsn=testset, inndeling = 3);
+
+%if &lag_referanse ne 0 %then %do;
+data skde_arn.ref_eoc7c;
+set testset;
+run;
+%end;
+
+proc compare base=skde_arn.ref_eoc7c compare=testset BRIEF WARNING LISTVAR;
 
 
 %if &debug eq 0 %then %do;
