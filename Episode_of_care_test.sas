@@ -102,14 +102,14 @@ proc compare base=skde_arn.ref_eoc4 compare=testset BRIEF WARNING LISTVAR;
 
 
 /*
-Teste det å ikke aggregere poliklinikk i EoC (ekskluder_poli ne 0)
+Teste det å ikke aggregere poliklinikk i EoC (separer_ut_poli ne 0)
 */
 
 data testset;
 set startsett;
 run;
 
-%episode_of_care(dsn=testset, ekskluder_poli = 1);
+%episode_of_care(dsn=testset, separer_ut_poli = 1);
 
 %if &lag_referanse ne 0 %then %do;
 data skde_arn.ref_eoc5;

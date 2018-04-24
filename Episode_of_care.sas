@@ -7,7 +7,7 @@ debug = 0,
 nulle_liggedogn = 0, 
 kols = 0, 
 inndeling = 0,
-ekskluder_poli = 0
+separer_ut_poli = 0
 );
 
 /*!
@@ -33,7 +33,7 @@ Inndatasettet må inneholde pid inndato utdato inntid og uttid
   - 1: alle kontakter til pasient internt i et behandlende RHF teller som en episode
   - 2: alle kontakter til pasient internt i et behandlende HF teller som en episode
   - 3: alle kontakter til pasient internt i et behandlende sykehus teller som en episode
-- `ekskluder_poli` (=0): Hvis ulik null teller alle poliklinikkonsultasjoner og konsultasjoner hos avtalespesialist som egne EoC (alle konsultasjoner der aktivitetskategori3 ikke er 1 eller 2)
+- `separer_ut_poli` (=0): Hvis ulik null teller alle poliklinikkonsultasjoner og konsultasjoner hos avtalespesialist som egne EoC (alle konsultasjoner der aktivitetskategori3 ikke er 1 eller 2)
   
 Episode of care omfatter da:
 - Dersom inndatotid på nytt opphold er før utdatotid på forrige opphold
@@ -74,7 +74,7 @@ Makroen lager 12 (eventuelt 14) nye variabler:
   - EoC-makroen fungerte ikke hvis man hadde med avtalespesialister
 - april 2018, Arnfinn
   - nytt argument: inndeling 
-  - nytt argument: ekskluder_poli
+  - nytt argument: separer_ut_poli
 
 */
 
@@ -97,7 +97,7 @@ if inntid=. then inntid=0;
 if uttid=. then uttid=0;
 inndatotid=dhms(innDato,0,0,innTid);
 utdatotid=dhms(utDato,0,0,utTid);
-%if &ekskluder_poli ne 0 %then %do;
+%if &separer_ut_poli ne 0 %then %do;
 if aktivitetskategori3 not in (1,2) then tmp_poli = 1;
 %end;
 format inndatotid utdatotid datetime18.;
