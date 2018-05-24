@@ -16,5 +16,7 @@ Tester for øyeblikket kun makroene
 %include "&filbane.makroer\&branch.\tests\reinnleggelser_test.sas";
 %reinnleggelser_test(branch=&branch);
 
+%include "&filbane.makroer\&branch.\tests\boomraader_test.sas";
+%boomraader_test(branch=&branch);
 
 %mend;
