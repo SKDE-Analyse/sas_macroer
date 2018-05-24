@@ -19,4 +19,7 @@ Tester for øyeblikket kun makroene
 %include "&filbane.makroer\&branch.\tests\boomraader_test.sas";
 %boomraader_test(branch=&branch);
 
+%include "&filbane.makroer\&branch.\tests\aggreger_test.sas";
+%aggreger_test(branch=&branch);
+
 %mend;

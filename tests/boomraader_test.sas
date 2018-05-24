@@ -4,14 +4,14 @@
 Makro for å teste boomraader-makro.
 
 Kjører boomraader-makroen på et test-datasett (`skde_tst.boomr_start`).
-Sammenligner dette datasettet med en referanse (`skde_tst.ref_boomr1` og `skde_tst.ref_boomr2`).
+Sammenligner dette datasettet med en referanse (`skde_tst.ref_boomr_&navn`).
 
 ### Parametre
 
 - `branch = master`: Bestemmer hvilken boomraader-makro som kjøres (hvilken mappe den ligger i)
-- `debug = 0`: Hvis ulik null, sletter ikke midlertidig referansedatasett `testset1` og `testset2`.
+- `debug = 0`: Hvis ulik null, sletter ikke midlertidig referansedatasett `testset_:`.
 - `lagNyRef = 0`: Hvis ulik null, lage startdatasettet `skde_tst.boomr_start` på nytt.
-- `lagNyStart = 0` Hvis ulik null, lage referansedatasettene `skde_tst.ref_boomr1` og `skde_tst.ref_boomr2` på nytt.
+- `lagNyStart = 0` Hvis ulik null, lage referansedatasettene `skde_tst.ref_boomr_&navn` på nytt.
 
 */
 
@@ -54,6 +54,9 @@ run;
 
 proc compare base=skde_tst.ref_boomr_&num. compare=testset_&num. BRIEF WARNING LISTVAR;
 
+%if &debug = 0 %then %do;
+proc delete data = testset_&num;
+%end;
 
 /*
 Test haraldsplass = 1
@@ -74,6 +77,9 @@ run;
 
 proc compare base=skde_tst.ref_boomr_&num. compare=testset_&num. BRIEF WARNING LISTVAR;
 
+%if &debug = 0 %then %do;
+proc delete data = testset_&num;
+%end;
 
 /*
 Test indreOslo = 1
@@ -94,6 +100,9 @@ run;
 
 proc compare base=skde_tst.ref_boomr_&num. compare=testset_&num. BRIEF WARNING LISTVAR;
 
+%if &debug = 0 %then %do;
+proc delete data = testset_&num;
+%end;
 
 /*
 Test bydel = 0
@@ -114,6 +123,9 @@ run;
 
 proc compare base=skde_tst.ref_boomr_&num. compare=testset_&num. BRIEF WARNING LISTVAR;
 
+%if &debug = 0 %then %do;
+proc delete data = testset_&num;
+%end;
 
 /*
 Test barn = 1
@@ -134,6 +146,10 @@ run;
 
 proc compare base=skde_tst.ref_boomr_&num. compare=testset_&num. BRIEF WARNING LISTVAR;
 
+%if &debug = 0 %then %do;
+proc delete data = testset_&num;
+%end;
+
 
 /*
 Test boaar = 2012
@@ -153,6 +169,10 @@ run;
 %end;
 
 proc compare base=skde_tst.ref_boomr_&num. compare=testset_&num. BRIEF WARNING LISTVAR;
+
+%if &debug = 0 %then %do;
+proc delete data = testset_&num;
+%end;
 
 
 %mend;
