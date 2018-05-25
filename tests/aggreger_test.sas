@@ -24,8 +24,7 @@ etter eoc.
 %if &lagNyStart ne 0 %then %do;
 
 data tmp;
-set skde_tst.pseudosens_avd_magnus;
-set skde_tst.pseudosens_avtspes_magnus;
+set skde_tst.pseudosens_avd_magnus skde_tst.pseudosens_avtspes_magnus;
 run;
 
 %episode_of_care(dsn = tmp);
